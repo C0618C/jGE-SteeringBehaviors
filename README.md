@@ -17,4 +17,4 @@
 3. 研究其它聚集效应的案例和算法，整合或优化现有的东西。
 
 # License
-You may use the jGE (or Steering Behaviors or Web Turtle) under the MIT license. See LICENSE.
+You may use the Steering Behaviors under the MIT license. See LICENSE.

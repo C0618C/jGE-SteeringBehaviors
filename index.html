@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jGE - Demo</title>
+    <script src="//vmwed.com/jGE/jGE.min.js"></script>
+    <script src="lib/jGE.Debug.js"></script>
+
+    <style>
+        * {padding: 0px;margin: 0px;}
+        body{overflow: hidden;}
+    </style>
+</head>
+<body>
+<div id="view_port"></div>
+
+<script>
+    (function(){
+
+        let x = new jGE({width:document.documentElement.clientWidth
+        ,height:document.documentElement.clientHeight});
+        document.getElementById("view_port").appendChild(x.GetDom());
+
+    })();
+</script>
+</body>
+</html>
