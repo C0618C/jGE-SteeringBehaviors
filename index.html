@@ -5,6 +5,8 @@
     <title>jGE - Demo</title>
     <script src="//vmwed.com/jGE/jGE.min.js"></script>
     <script src="lib/jGE.Debug.js"></script>
+    <script src="MoveObj.js"></script>
+    <script src="Test/UnitTest.js"></script>
 
     <style>
         * {padding: 0px;margin: 0px;}
@@ -20,6 +22,8 @@
         let x = new jGE({width:document.documentElement.clientWidth
         ,height:document.documentElement.clientHeight});
         document.getElementById("view_port").appendChild(x.GetDom());
+
+        UT.Seek(x);
 
     })();
 </script>

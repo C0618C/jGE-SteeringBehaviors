@@ -41,8 +41,11 @@ function loadFile(pathname, res) {
 }
 
 
-let pathDir = fpath.replace(local + "\\", "").replace("\\", "/");
-pathDir = pathDir.substr(0, pathDir.lastIndexOf("/"));
+let pathDir = "";
+if(fpath){
+    fpath.replace(local + "\\", "").replace("\\", "/");
+    pathDir = pathDir.substr(0, pathDir.lastIndexOf("/"));
+}
 let localDir = __dirname.replace(/\/|\\test/i, "");
 http.createServer(function (req, res) {
     let reqPath = decodeURI(url.parse(req.url).pathname);

@@ -11,7 +11,7 @@
             "program": "${workspaceRoot}/Test/run.js",
             "args":["13457","${workspaceRoot}","${file}"]
         },
-        // {
+        // {0
         //     "type": "PowerShell",
         //     "request": "launch",
         //     "name": "PowerShell Launch (IIS)",
@@ -20,12 +20,12 @@
         //     "cwd": "${workspaceRoot}"
         // },
         {
-            "type": "chrome",
+            "type": "node",
             "request": "launch",
             "name": "Launch Chrome",
-            "url": "http://127.0.0.1:8989",
-            "sourceMaps": true,
-            "webRoot": "${workspaceRoot}/index.html"
+            "name": "打开主页",
+            "program": "${workspaceRoot}/Test/run.js",
+            "args":["13457","${workspaceRoot}","/index.html"]
         },
         // {
         //     "type": "chrome",
