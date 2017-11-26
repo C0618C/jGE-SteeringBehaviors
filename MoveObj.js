@@ -1,166 +1,161 @@
-class Velocity{             //速度量
-    constructor(speed,angle){
-        this.speed = speed;
-        this.angle = angle;
-    }
-
-    get x(){
-        return Math.cos(this.angle)*this.speed;
-    }
-    get y(){
-        return Math.sin(this.angle)*this.speed;
-    }
-}
-
-class MoveObj extends ShowObj{
-    get target(){
+class MoveObj extends ShowObj {
+    get target() {
         return this.__tg;
     }
-    set target(v){
+    set target(v) {
         this.__tg = v;
     }
-    constructor(...args){
+    constructor(...args) {
         super(...args);
 
         //this.__tg = new Vector2D(0,0);
-        this.target = new Vector2D(0,0);
+        this.target = new Vector2D(this.x, this.y);
+
+        //抵达
+        this.arrive = {
+            deceleration: 0,     //用多少秒抵达目标
+            speed: 0,            //速度/S
+            angle: 0              //角速度
+        }
+
 
         //徘徊用变量
-        this.wander={
-            tp:new Vector2D(),//范围圆心
-            radius:22,      //随机半径
-            distance:42,    //突出距离
-            jitter:40       //随机位移最大值
+        this.wander = {
+            tp: new Vector2D(),//范围圆心
+            radius: 22,      //随机半径
+            distance: 42,    //突出距离
+            jitter: 40       //随机位移最大值
         };
 
-        this.followpath={
-            points:[],
-            minWidth:0,
-            maxWidth:800,
-            minHeight:0,
-            maxHeight:600
+        this.followpath = {
+            points: [],
+            minWidth: 0,
+            maxWidth: 800,
+            minHeight: 0,
+            maxHeight: 600
         };
 
-        this.v = new Velocity(5,π/4);
+        this.v = new Vector2D();
+        this.v.Velocity(5, -π_hf);
 
-        //this.velocity = new Vector2D(220,50);         //速度 v
-        // this.speed = 150;//px/s  最大速率
-        // this.rSpeed = 0;//角速度
 
         this.l = 10;//三角形外观参数
-        this.r = Math.PI;
+        this.r = π;
 
         this.tw = 0;//wander时用的当前朝向
 
         this.a = new Vector2D();
         this.b = new Vector2D();
         this.c = new Vector2D();
-        this.CurAction = this.Seek;
-        this._steps=[];
+        this.CurAction = () => { };
+        this._steps = [];
     }
 
     //走
-    Go(t){
-        if(this.IsArive(t)) return;
+    Go(t) {
+        if (this.IsArive(t)) return;
         this.AddIn(this.v);
     }
 
     //靠近
-    Seek(v_tg){
-
+    Seek(v_tg) {
+        this.CurAction = this.Go;
         this.target = v_tg;
-        let tv = new Vector2D(this.v);
-        this.v.angle -= Math.acos(tv.Dot(v_tg)/(tv.Length()*v_tg.Length()));
-
-        // let tempP=this.Minus(this.a).Normalize();
-        // tempP.MultiplyIn(-this.speed*t/1000);
-        // this.AddIn(tempP);
-
-        //
-        //let dv =  this.Minus(v_tg).Normalize().Multiply(this.speed*t/1000);
-        //this.AddIn(dv.Minus(this.velocity));
+        this.v = v_tg.Minus(this).Normalize().Multiply(this.v.speed);
     }
 
-//     //离开
-//     Flee(t,v_tg){
-//         let dv =  v_tg.Minus(this).Normalize().Multiply(this.speed*t/1000);
-//         //this.AddIn(dv.Minus(this.velocity));
-//     }
+    //离开
+    Flee(v_tg) {
+        this.CurAction = this.Go;
+        this.target = v_tg;
+        this.v = this.Minus(v_tg).Normalize().Multiply(this.v.speed);
+    }
 
-//     //抵达
-//     Arrive(v,deceleration){}
+    //抵达
+    Arrive(v_tg, deceleration) {    //目标，计划用时
+        this.target = v_tg;
+        this.arrive.deceleration = deceleration;
+        this.arrive.speed = v_tg.Distance(this) / deceleration / 1000;
+        this.arrive.angle = v_tg.Minus(this).Normalize().va;
+        this.CurAction = this.ArriveDo;
+    }
+    ArriveDo(t) {
+        this.v = new Vector2D();
+        this.v.Velocity(this.arrive.speed * t, this.arrive.angle);
+        this.Go(t);
+    }
 
-//     //追逐
-//     Pursuit(v){}
+    //     //追逐
+    //     Pursuit(v){}
 
-//     //逃避
-//     Evade(v){}
+    //     //逃避
+    //     Evade(v){}
 
-//     //徘徊
-//     Wander(t){
-//         //算法有瑕疵 需优化
-//         const jit = this.wander.jitter * t/1000;
-//         const tget = new Vector2D(RandomClamped()*jit,RandomClamped()*jit);//new Vector2D(this.target);
+    //     //徘徊
+    //     Wander(t){
+    //         //算法有瑕疵 需优化
+    //         const jit = this.wander.jitter * t/1000;
+    //         const tget = new Vector2D(RandomClamped()*jit,RandomClamped()*jit);//new Vector2D(this.target);
 
-//         this.target = tget.Normalize();
-//         this.target.MultiplyIn(this.wander.radius);
-//         if(this.tw == 0)
-//             this.target = this.target.Add( new Vector2D(this.wander.distance,0));
-//         else
-//             this.target = this.target.Minus( new Vector2D(this.wander.distance,0));
+    //         this.target = tget.Normalize();
+    //         this.target.MultiplyIn(this.wander.radius);
+    //         if(this.tw == 0)
+    //             this.target = this.target.Add( new Vector2D(this.wander.distance,0));
+    //         else
+    //             this.target = this.target.Minus( new Vector2D(this.wander.distance,0));
 
-//         this.target.AddIn(this);
-//         //console.log(this.target);
-//     }
+    //         this.target.AddIn(this);
+    //         //console.log(this.target);
+    //     }
 
-//     //避障
-//     ObstacleAvoidance(obstacles){}
+    //     //避障
+    //     ObstacleAvoidance(obstacles){}
 
-//     //避墙
-//     WallAvoidance(walls){}
+    //     //避墙
+    //     WallAvoidance(walls){}
 
-//     //插入
-//     Interpose(){}
+    //     //插入
+    //     Interpose(){}
 
-//     //躲藏
-//     Hide(){}
+    //     //躲藏
+    //     Hide(){}
 
-//     //跟随路径
-//     FollowPath(t){
-//         if(this.followpath.points.length <= 1){
-//             const num = Math.floor(Math.random()*100)%20;
-//             for(let j=0;j<num;j++){
-//                 const x = Math.floor(Math.random()*100000)%(this.followpath.maxWidth - this.followpath.minWidth)+this.followpath.minWidth;
-//                 const y = Math.floor(Math.random()*100000)%(this.followpath.maxHeight - this.followpath.minHeight)+this.followpath.minHeight;
-//                 this.followpath.points.push(new Vector2D(x,y));
-//             }
-//         }
-//         if(this.target.Minus(this).Length()<=this.speed*t/1000){
-// //            console.log("A:",this.target,this,this.target.Minus(this).Length(),this.speed*t/1000);
-//             //this.target.Copy(this.followpath.points.shift());
-//             this.target = this.followpath.points.shift();
-// //            console.log("B:",this.target,this,this.target.Minus(this).Length(),this.speed*t/1000);
-//         }
-//     }
+    //     //跟随路径
+    //     FollowPath(t){
+    //         if(this.followpath.points.length <= 1){
+    //             const num = Math.floor(Math.random()*100)%20;
+    //             for(let j=0;j<num;j++){
+    //                 const x = Math.floor(Math.random()*100000)%(this.followpath.maxWidth - this.followpath.minWidth)+this.followpath.minWidth;
+    //                 const y = Math.floor(Math.random()*100000)%(this.followpath.maxHeight - this.followpath.minHeight)+this.followpath.minHeight;
+    //                 this.followpath.points.push(new Vector2D(x,y));
+    //             }
+    //         }
+    //         if(this.target.Minus(this).Length()<=this.speed*t/1000){
+    // //            console.log("A:",this.target,this,this.target.Minus(this).Length(),this.speed*t/1000);
+    //             //this.target.Copy(this.followpath.points.shift());
+    //             this.target = this.followpath.points.shift();
+    // //            console.log("B:",this.target,this,this.target.Minus(this).Length(),this.speed*t/1000);
+    //         }
+    //     }
 
-//     //队形
-//     OffsetPursuit(leader,offset){}
+    //     //队形
+    //     OffsetPursuit(leader,offset){}
 
-//     //分离
-//     Separation(){}
+    //     //分离
+    //     Separation(){}
 
-//     //队列
-//     Alignment(){}
+    //     //队列
+    //     Alignment(){}
 
-//     //聚集
-//     Cohesion(){}
+    //     //聚集
+    //     Cohesion(){}
 
-//     //群集
-//     Flocking(){}
+    //     //群集
+    //     Flocking(){}
 
-    render(c2d){
+    render(c2d) {
         // //c2d
-        if(!false){
+        if (!false) {
             //红色圆形底盘
             c2d.beginPath();
             c2d.strokeStyle = 'red';
@@ -170,34 +165,34 @@ class MoveObj extends ShowObj{
             c2d.fill();
 
             //画轨迹
-            if(this._steps.length > 0){
+            if (this._steps.length > 0) {
                 c2d.beginPath();
-                c2d.moveTo(this._steps[0].x,this._steps[0].y);
-                for(let s of this._steps){
-                    c2d.lineTo(s.x,s.y);
+                c2d.moveTo(this._steps[0].x, this._steps[0].y);
+                for (let s of this._steps) {
+                    c2d.lineTo(s.x, s.y);
                 }
                 c2d.strokeStyle = "#888888";
                 c2d.stroke();
             }
 
-            if(this.CurAction == this.Wander){  //徘徊用辅助
+            if (this.CurAction == this.Wander) {  //徘徊用辅助
                 c2d.beginPath();
                 c2d.moveTo(this.wander.tp.x, this.wander.tp.y);
                 c2d.arc(this.wander.tp.x, this.wander.tp.y, this.wander.radius, 0, 2 * Math.PI);
                 c2d.strokeStyle = 'yellow';
                 c2d.stroke();
-            }else if(this.CurAction == this.FollowPath){
-                c2d.fillStyle='pink';
+            } else if (this.CurAction == this.FollowPath) {
+                c2d.fillStyle = 'pink';
                 c2d.strokeStyle = 'lightgray';
                 let curP = this.target;
-                for(var p of this.followpath.points){
+                for (var p of this.followpath.points) {
                     c2d.beginPath();
-                    c2d.arc(p.x,p.y,2,0,2*Math.PI);
+                    c2d.arc(p.x, p.y, 2, 0, 2 * Math.PI);
                     c2d.closePath();
                     c2d.fill();
                     c2d.beginPath();
-                    c2d.moveTo(curP.x,curP.y);
-                    c2d.lineTo(p.x,p.y);
+                    c2d.moveTo(curP.x, curP.y);
+                    c2d.lineTo(p.x, p.y);
                     c2d.closePath();
                     c2d.stroke();
                     curP.Copy(p);
@@ -206,14 +201,14 @@ class MoveObj extends ShowObj{
 
             //三角形本体
             c2d.beginPath();
-            c2d.moveTo(this.a.x,this.a.y);
-            c2d.lineTo(this.b.x,this.b.y);
-            c2d.lineTo(this.c.x,this.c.y);
-            c2d.fillStyle='blue';
+            c2d.moveTo(this.a.x, this.a.y);
+            c2d.lineTo(this.b.x, this.b.y);
+            c2d.lineTo(this.c.x, this.c.y);
+            c2d.fillStyle = 'blue';
             c2d.fill();
 
             //目标点
-            if(this.target != null){
+            if (this.target != null) {
                 c2d.beginPath();
                 c2d.moveTo(this.x, this.y);
                 c2d.lineTo(this.target.x, this.target.y);
@@ -221,38 +216,39 @@ class MoveObj extends ShowObj{
                 c2d.stroke();
                 c2d.beginPath();
                 c2d.strokeStyle = 'red';
-                c2d.fillStyle='black';
+                c2d.fillStyle = 'black';
                 c2d.arc(this.target.x, this.target.y, 5, 0, 2 * Math.PI);
                 c2d.fill();
-                c2d.moveTo(this.target.x-10,this.target.y);
-                c2d.lineTo(this.target.x+10,this.target.y);
-                c2d.moveTo(this.target.x,this.target.y-10);
-                c2d.lineTo(this.target.x,this.target.y+10);
+                c2d.moveTo(this.target.x - 10, this.target.y);
+                c2d.lineTo(this.target.x + 10, this.target.y);
+                c2d.moveTo(this.target.x, this.target.y - 10);
+                c2d.lineTo(this.target.x, this.target.y + 10);
                 c2d.closePath();
                 c2d.stroke();
             }
         }
     }
 
-    update(t,world){
+    update(t, world) {
         const w_s = world.GetSetting();
         //环形世界设置
-        if(w_s.isRoundWorld){
+        if (w_s.isRoundWorld) {
             const ar = world.GetArea();
             // if(this.x >= ar.width){this.tw = 1;}
             // if(this.x < 0) {this.tw = 0;}
-            if(this.x >= ar.width){this.x = 0;}
-            if(this.x < 0) {this.tw = ar.width;}
-            if(this.y >= ar.height) this.y-= ar.height;
-            if(this.y < 0) this.y = ar.height;
+            if (this.x >= ar.width) { this.x = 0; }
+            if (this.x < 0) { this.x = ar.width; }
+            if (this.y >= ar.height) this.y -= ar.height;
+            if (this.y < 0) this.y = ar.height;
         }
 
-        this.Go(t);  //移动
+        //this.Go(t);  //移动
+        this.CurAction(t);
 
         //计算外形基点
-        this.a=this.Add((new Vector2D({x:0*this.l,y:2*this.l})).Turn(this.r));
-        this.b=this.Add((new Vector2D({x:-1*this.l,y:-1.5*this.l})).Turn(this.r));
-        this.c=this.Add((new Vector2D({x:1*this.l,y:-1.5*this.l})).Turn(this.r));
+        this.a = this.Add((new Vector2D({ x: 0 * this.l, y: 2 * this.l })).Turn(this.r));
+        this.b = this.Add((new Vector2D({ x: -1 * this.l, y: -1.5 * this.l })).Turn(this.r));
+        this.c = this.Add((new Vector2D({ x: 1 * this.l, y: -1.5 * this.l })).Turn(this.r));
 
         //使朝向与目标点一致
         // const tv=this.target.Minus(this);
@@ -261,9 +257,9 @@ class MoveObj extends ShowObj{
         // if(this.r == NaN) this.r = 0;
 
         //使朝向与速度一致
-        this.r = π2-this.v.angle;
+        this.r = this.v.va - π_hf;
 
-        if(this.CurAction == this.Wander) {
+        if (this.CurAction == this.Wander) {
             this.wander.tp = this.Minus(this.a).Normalize();
             this.wander.tp.MultiplyIn(-this.wander.tp.Length() - this.wander.distance);
             this.wander.tp.AddIn(this);
@@ -273,9 +269,9 @@ class MoveObj extends ShowObj{
         this._steps.push(new Vector2D(this));
     }
 
-    IsArive(t){
-        if(this.target == null) return false;
+    IsArive(t) {
+        if (this.target == null) return false;
         const des = this.v.speed;
-        return this.target.Minus(this).Length()<=des;
+        return this.target.DistanceSq(this) <= des;
     }
 }

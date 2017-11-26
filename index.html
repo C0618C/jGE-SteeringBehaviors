@@ -3,10 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>jGE - Demo</title>
-    <script src="//vmwed.com/jGE/jGE.min.js"></script>
-    <script src="lib/jGE.Debug.js"></script>
-    <script src="MoveObj.js"></script>
-    <script src="Test/UnitTest.js"></script>
 
     <style>
         * {padding: 0px;margin: 0px;}
@@ -16,15 +12,16 @@
 <body>
 <div id="view_port"></div>
 
+<script src="//vmwed.com/jGE/jGE.min.js?v=3.2.0"></script>
+<!-- <script src="http://127.0.0.1:2262/release/jGE.js?v=3.2.0"></script> -->
+<script src="lib/jGE.Debug.js"></script>
+<script src="MoveObj.js"></script>
+<script src="SteeringBehaviors.js"></script>
 <script>
     (function(){
 
-        let x = new jGE({width:document.documentElement.clientWidth
-        ,height:document.documentElement.clientHeight});
-        document.getElementById("view_port").appendChild(x.GetDom());
-
-        UT.Seek(x);
-
+        const sb = new SteeringBehaviors("view_port");
+        
     })();
 </script>
 </body>
