@@ -11,7 +11,7 @@ class MoveObj extends ShowObj {
         //this.__tg = new Vector2D(0,0);
         this.target = new Vector2D(this.x, this.y);
 
-        //抵达
+        //抵达 变量
         this.arrive = {
             deceleration: 0,     //用多少秒抵达目标
             speed: 0,            //速度/S
@@ -19,12 +19,14 @@ class MoveObj extends ShowObj {
         }
 
 
-        //徘徊用变量
+        //徘徊 变量
         this.wander = {
+            showtool:true,     //是否显示辅助工具
             tp: new Vector2D(),//范围圆心
-            radius: 22,      //随机半径
-            distance: 42,    //突出距离
-            jitter: 40       //随机位移最大值
+            radius: 52,      //随机半径
+            distance: 82,    //突出距离
+            jitter: 40,       //随机位移最大值
+            tg:null             //产生应力的目标点
         };
 
         this.followpath = {
@@ -36,7 +38,7 @@ class MoveObj extends ShowObj {
         };
 
         this.v = new Vector2D();
-        this.v.Velocity(5, -π_hf);
+        this.v.Velocity(2, -π_hf);
 
 
         this.l = 10;//三角形外观参数
@@ -91,22 +93,40 @@ class MoveObj extends ShowObj {
     //     //逃避
     //     Evade(v){}
 
-    //     //徘徊
-    //     Wander(t){
-    //         //算法有瑕疵 需优化
-    //         const jit = this.wander.jitter * t/1000;
-    //         const tget = new Vector2D(RandomClamped()*jit,RandomClamped()*jit);//new Vector2D(this.target);
+    //徘徊
+    Wander(r,d,j) {
+        this.wander.radius = r;
+        this.wander.distance = d;
+        this.wander.jitter = j;
 
-    //         this.target = tget.Normalize();
-    //         this.target.MultiplyIn(this.wander.radius);
-    //         if(this.tw == 0)
-    //             this.target = this.target.Add( new Vector2D(this.wander.distance,0));
-    //         else
-    //             this.target = this.target.Minus( new Vector2D(this.wander.distance,0));
+        this.CurAction = this.WanderDo;
+    }
+    WanderDo(t){
+        let p1 = new Vector2D();
+        p1.Velocity(this.wander.distance,this.v.va)
+        this.wander.tp = this.Add(p1);
 
-    //         this.target.AddIn(this);
-    //         //console.log(this.target);
-    //     }
+        
+        if (this.IsArive(t)) this.WanderResetTarget();
+
+        this.AddIn(this.v);
+    }
+    WanderResetTarget(){
+        let r = this.wander.radius;
+        let x1 = Math.floor(Math.random()*2*r)+this.wander.tp.x - r;
+        let y1 = 0;
+
+        let x2 = this.wander.tp.x;
+        let y2 = this.wander.tp.y;
+
+        y1 = Math.floor( Math.sqrt( r*r-Math.pow(x1-x2,2) )*(Math.random()>0.5?1:-1) + y2 );
+
+        if(typeof x1 === typeof y1){
+            this.wander.tg = new Vector2D(x1,y1);
+            this.Seek(this.wander.tg);
+            this.CurAction = this.WanderDo;
+        }
+    }
 
     //     //避障
     //     ObstacleAvoidance(obstacles){}
@@ -157,12 +177,12 @@ class MoveObj extends ShowObj {
         // //c2d
         if (!false) {
             //红色圆形底盘
-            c2d.beginPath();
-            c2d.strokeStyle = 'red';
-            c2d.fillStyle = 'darkred';
-            c2d.lineWidth = 1;
-            c2d.arc(this.x, this.y, this.l * 2, this.r + Math.PI / 2, 2 * Math.PI + this.r + Math.PI / 2);
-            c2d.fill();
+            // c2d.beginPath();
+            // c2d.strokeStyle = 'red';
+            // c2d.fillStyle = '#c08289';
+            // c2d.lineWidth = 1;
+            // c2d.arc(this.x, this.y, this.l * 2, this.r + Math.PI / 2, 2 * Math.PI + this.r + Math.PI / 2);
+            // c2d.fill();
 
             //画轨迹
             if (this._steps.length > 0) {
@@ -174,40 +194,54 @@ class MoveObj extends ShowObj {
                 c2d.strokeStyle = "#888888";
                 c2d.stroke();
             }
-
-            if (this.CurAction == this.Wander) {  //徘徊用辅助
+            
+            if(this.wander.showtool){
                 c2d.beginPath();
-                c2d.moveTo(this.wander.tp.x, this.wander.tp.y);
-                c2d.arc(this.wander.tp.x, this.wander.tp.y, this.wander.radius, 0, 2 * Math.PI);
-                c2d.strokeStyle = 'yellow';
+                c2d.arc(this.wander.tp.x,this.wander.tp.y,this.wander.radius,0,π2);
+                c2d.strokeStyle = "#666cc6";
                 c2d.stroke();
-            } else if (this.CurAction == this.FollowPath) {
-                c2d.fillStyle = 'pink';
-                c2d.strokeStyle = 'lightgray';
-                let curP = this.target;
-                for (var p of this.followpath.points) {
+
+                if(this.wander.tg){
                     c2d.beginPath();
-                    c2d.arc(p.x, p.y, 2, 0, 2 * Math.PI);
-                    c2d.closePath();
+                    c2d.arc(this.wander.tg.x,this.wander.tg.y,2,0,π2);
+                    c2d.fillStyle = "#007777";
                     c2d.fill();
-                    c2d.beginPath();
-                    c2d.moveTo(curP.x, curP.y);
-                    c2d.lineTo(p.x, p.y);
-                    c2d.closePath();
-                    c2d.stroke();
-                    curP.Copy(p);
                 }
             }
+
+            // if (this.CurAction == this.Wander) {  //徘徊用辅助
+            //     c2d.beginPath();
+            //     c2d.moveTo(this.wander.tp.x, this.wander.tp.y);
+            //     c2d.arc(this.wander.tp.x, this.wander.tp.y, this.wander.radius, 0, 2 * Math.PI);
+            //     c2d.strokeStyle = 'yellow';
+            //     c2d.stroke();
+            // } else if (this.CurAction == this.FollowPath) {
+            //     c2d.fillStyle = 'pink';
+            //     c2d.strokeStyle = 'lightgray';
+            //     let curP = this.target;
+            //     for (var p of this.followpath.points) {
+            //         c2d.beginPath();
+            //         c2d.arc(p.x, p.y, 2, 0, 2 * Math.PI);
+            //         c2d.closePath();
+            //         c2d.fill();
+            //         c2d.beginPath();
+            //         c2d.moveTo(curP.x, curP.y);
+            //         c2d.lineTo(p.x, p.y);
+            //         c2d.closePath();
+            //         c2d.stroke();
+            //         curP.Copy(p);
+            //     }
+            // }
 
             //三角形本体
             c2d.beginPath();
             c2d.moveTo(this.a.x, this.a.y);
             c2d.lineTo(this.b.x, this.b.y);
             c2d.lineTo(this.c.x, this.c.y);
-            c2d.fillStyle = 'blue';
+            c2d.fillStyle = 'green';
             c2d.fill();
 
-            //目标点
+            //连线-目标点
             if (this.target != null) {
                 c2d.beginPath();
                 c2d.moveTo(this.x, this.y);
@@ -258,12 +292,6 @@ class MoveObj extends ShowObj {
 
         //使朝向与速度一致
         this.r = this.v.va - π_hf;
-
-        if (this.CurAction == this.Wander) {
-            this.wander.tp = this.Minus(this.a).Normalize();
-            this.wander.tp.MultiplyIn(-this.wander.tp.Length() - this.wander.distance);
-            this.wander.tp.AddIn(this);
-        }
 
         //加入轨迹
         this._steps.push(new Vector2D(this));
