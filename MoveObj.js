@@ -10,6 +10,9 @@ class MoveObj extends ShowObj {
 
         //this.__tg = new Vector2D(0,0);
         this.target = new Vector2D(this.x, this.y);
+        this.lineSpeed = 0.25;         //线速度px/ms
+
+        this.isNeedStop = true;     //达到目标后是否停下
 
         //抵达 变量
         this.arrive = {
@@ -55,12 +58,13 @@ class MoveObj extends ShowObj {
 
     //走
     Go(t) {
-        if (this.IsArive(t)) return;
+        this.v.Velocity(this.lineSpeed*t,this.v.va);
         this.AddIn(this.v);
     }
 
     //靠近
     Seek(v_tg) {
+        this.isNeedStop = true;
         this.CurAction = this.Go;
         this.target = v_tg;
         this.v = v_tg.Minus(this).Normalize().Multiply(this.v.speed);
@@ -68,6 +72,7 @@ class MoveObj extends ShowObj {
 
     //离开
     Flee(v_tg) {
+        this.isNeedStop = true;
         this.CurAction = this.Go;
         this.target = v_tg;
         this.v = this.Minus(v_tg).Normalize().Multiply(this.v.speed);
@@ -75,6 +80,7 @@ class MoveObj extends ShowObj {
 
     //抵达
     Arrive(v_tg, deceleration) {    //目标，计划用时
+        this.isNeedStop = true;
         this.target = v_tg;
         this.arrive.deceleration = deceleration;
         this.arrive.speed = v_tg.Distance(this) / deceleration / 1000;
@@ -108,8 +114,9 @@ class MoveObj extends ShowObj {
 
         
         if (this.IsArive(t)) this.WanderResetTarget();
+        if(this.target.Minus(this).Length() > this.wander.radius*2+this.wander.distance)this.WanderResetTarget();//bug fix
 
-        this.AddIn(this.v);
+        this.Go(t);
     }
     WanderResetTarget(){
         let r = this.wander.radius;
@@ -126,6 +133,7 @@ class MoveObj extends ShowObj {
             this.Seek(this.wander.tg);
             this.CurAction = this.WanderDo;
         }
+        this.isNeedStop = false;
     }
 
     //     //避障
@@ -188,8 +196,13 @@ class MoveObj extends ShowObj {
             if (this._steps.length > 0) {
                 c2d.beginPath();
                 c2d.moveTo(this._steps[0].x, this._steps[0].y);
+                let lastP = this._steps[0];
                 for (let s of this._steps) {
-                    c2d.lineTo(s.x, s.y);
+                    if(s.Minus(lastP).Length() > 500)
+                        c2d.moveTo(s.x, s.y);
+                    else
+                        c2d.lineTo(s.x, s.y);
+                    lastP = s;
                 }
                 c2d.strokeStyle = "#888888";
                 c2d.stroke();
@@ -277,7 +290,7 @@ class MoveObj extends ShowObj {
         }
 
         //this.Go(t);  //移动
-        this.CurAction(t);
+        if (!this.IsArive(t) || !this.isNeedStop) this.CurAction(t);
 
         //计算外形基点
         this.a = this.Add((new Vector2D({ x: 0 * this.l, y: 2 * this.l })).Turn(this.r));

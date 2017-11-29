@@ -14,6 +14,7 @@ class SteeringBehaviors {
         this.CurTarget = this.AddAnObj();  //当前获得焦点的物体
 
         this.WanderTest();
+        this.CurTarget.WanderResetTarget();
     }
 
     AddAnObj() {
@@ -38,7 +39,7 @@ class SteeringBehaviors {
     }
 
     WanderTest(e){
-        this.CurTarget.Wander(50,45,10);
+        this.CurTarget.Wander(30,85,10);
     }
 
 }
