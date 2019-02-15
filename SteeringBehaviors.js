@@ -8,7 +8,7 @@ class SteeringBehaviors {
 
         document.getElementById(domName).appendChild(this._jGE.GetDom());
 
-        this._jGE.OnMouse("click",(e)=>this.CurTarget.WanderResetTarget(), this);
+        //this._jGE.OnMouse("click",(e)=>this.CurTarget.WanderResetTarget(), this);
 
         this.MoveObjects = new Set();
         this.CurTarget = this.AddAnObj();  //当前获得焦点的物体
@@ -17,7 +17,10 @@ class SteeringBehaviors {
         //this.WanderTest(this.AddAnObj());
 
         //抵达测试
-        this.ArriveTest(this._jGE);
+        //this.ArriveTest();
+
+        //靠近测试
+        this.SeekTest();
     }
 
     AddAnObj() {
@@ -30,18 +33,16 @@ class SteeringBehaviors {
     }
 
 
-    SeekTest(e) {
-        this.CurTarget.Seek(new Vector2D(GetEventPosition(e)));
+    SeekTest() {
+        this._jGE.OnMouse("click",(e)=>this.CurTarget.Seek(new Vector2D(GetEventPosition(e))), this);
     }
     FleeTest(e) {
         this.CurTarget.Flee(new Vector2D(GetEventPosition(e)));
     }
 
-    ArriveTest(jGE){
-        let dom = jGE.GetDom();
-        let target = this.CurTarget;
-        dom.addEventListener("click",function(e){
-            target.Arrive(new Vector2D(GetEventPosition(e)),0.5);
+    ArriveTest(){
+        this._jGE.OnMouse("click",(e)=>{
+            this.CurTarget.Arrive(new Vector2D(GetEventPosition(e)),0.5);
         })
     }
 
