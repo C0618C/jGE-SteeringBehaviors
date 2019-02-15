@@ -13,8 +13,11 @@ class SteeringBehaviors {
         this.MoveObjects = new Set();
         this.CurTarget = this.AddAnObj();  //当前获得焦点的物体
 
-        this.WanderTest();
-        this.CurTarget.WanderResetTarget();
+        //自动开始徘徊测试
+        //this.WanderTest(this.AddAnObj());
+
+        //抵达测试
+        this.ArriveTest(this._jGE);
     }
 
     AddAnObj() {
@@ -34,12 +37,17 @@ class SteeringBehaviors {
         this.CurTarget.Flee(new Vector2D(GetEventPosition(e)));
     }
 
-    ArriveTest(e){
-        this.CurTarget.Arrive(new Vector2D(GetEventPosition(e)),0.5);
+    ArriveTest(jGE){
+        let dom = jGE.GetDom();
+        let target = this.CurTarget;
+        dom.addEventListener("click",function(e){
+            target.Arrive(new Vector2D(GetEventPosition(e)),0.5);
+        })
     }
 
-    WanderTest(e){
-        this.CurTarget.Wander(30,85,10);
+    WanderTest(target){
+        target.Wander(30,85,10);
+        target.WanderResetTarget();
     }
 
 }

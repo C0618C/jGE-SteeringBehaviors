@@ -310,9 +310,10 @@ class MoveObj extends ShowObj {
         this._steps.push(new Vector2D(this));
     }
 
+    //是否抵达目标
     IsArive(t) {
         if (this.target == null) return false;
-        const des = this.v.speed;
-        return this.target.DistanceSq(this) <= des;
+        const des = this.v.speed*t;
+        return this.target.DistanceSq(this) - des < 0;
     }
 }

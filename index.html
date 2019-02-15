@@ -2,16 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>jGE - Demo</title>
+    <title>SteeringBehaviors</title>
 
     <style>
         * {padding: 0px;margin: 0px;}
         body{overflow: hidden;}
+        #fork_me {
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
-<div id="view_port"></div>
-
+    <div id="view_port"></div>
+    <div id="fork_me">
+        <a href="https://github.com/C0618C/jGE-MusicBox">
+            <img src="//vmwed.com/CDN/img/forkme-on-github-right.png" title="trun to github" />
+        </a>
+    </div>
 <script src="//vmwed.com/jGE/jGE.min.js?v=3.2.0"></script>
 <!-- <script src="http://127.0.0.1:2262/release/jGE.js?v=3.2.0"></script> -->
 <script src="lib/jGE.Debug.js"></script>
