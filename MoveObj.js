@@ -65,9 +65,14 @@ class MoveObj extends ShowObj {
     //靠近
     Seek(v_tg) {
         this.isNeedStop = true;
-        this.CurAction = this.Go;
+        this.CurAction = this.SeekDo;
         this.target = v_tg;
-        this.v = v_tg.Minus(this).Normalize().Multiply(this.v.speed);
+        //this.SeekDo();
+    }
+    SeekDo(t) {
+        //this.target = v_tg;
+        this.v = this.target.Minus(this).Normalize().Multiply(this.v.speed);
+        this.Go(t);
     }
 
     //离开
