@@ -8,24 +8,33 @@ class SteeringBehaviors {
 
         document.getElementById(domName).appendChild(this._jGE.GetDom());
 
-        //this._jGE.OnMouse("click",(e)=>this.CurTarget.WanderResetTarget(), this);
-
         this.MoveObjects = new Set();
-        this.CurTarget = this.AddAnObj();  //当前获得焦点的物体
+        //this.CurTarget = this.AddAnObj();  //当前获得焦点的物体
 
         //自动开始徘徊测试
-        //this.WanderTest(this.AddAnObj());
+        // this.WanderTest();
+        this.WanderTestMS();
 
         //抵达测试
-        //this.ArriveTest();
+        // this.ArriveTest();
 
         //靠近测试
-        this.SeekTest();
+        // this.SeekTest();
+
+        //远离测试
+        // this.FleeTest()
+
+        //路径跟随
+        // this.FollowPathTest();
     }
 
-    AddAnObj() {
+    AddAnObj(acm, setting, isDebug = true) {
         let a = this._jGE.GetArea();
-        let obj = new MoveObj({x:a.width/2,y:a.height/2});
+        let obj = new MoveObj({
+            x: a.width / 2, y: a.height / 2, ActionModel: acm
+            , setting: setting
+            , isDebug: isDebug     //是否使用辅助线等
+        });
         this.MoveObjects.add(obj);
         this._jGE.add(obj);
 
@@ -34,21 +43,28 @@ class SteeringBehaviors {
 
 
     SeekTest() {
-        this._jGE.OnMouse("click",(e)=>this.CurTarget.Seek(new Vector2D(GetEventPosition(e))), this);
+        this.CurTarget = this.AddAnObj("SEEK");
+        this._jGE.OnMouse("click", (e) => this.CurTarget.SetTarget(new Vector2D(GetEventPosition(e))));
     }
-    FleeTest(e) {
-        this.CurTarget.Flee(new Vector2D(GetEventPosition(e)));
-    }
-
-    ArriveTest(){
-        this._jGE.OnMouse("click",(e)=>{
-            this.CurTarget.Arrive(new Vector2D(GetEventPosition(e)),0.5);
-        })
+    FleeTest() {
+        this.CurTarget = this.AddAnObj("FLEE");
+        this._jGE.OnMouse("click", (e) => this.CurTarget.SetTarget(new Vector2D(GetEventPosition(e))));
     }
 
-    WanderTest(target){
-        target.Wander(30,85,10);
-        target.WanderResetTarget();
+
+    ArriveTest() {
+        this.CurTarget = this.AddAnObj("ARRIVE", { deceleration: 0.25 });
+        this._jGE.OnMouse("click", (e) => this.CurTarget.SetTarget(new Vector2D(GetEventPosition(e)), Math.random()));
     }
 
+    WanderTest() {
+        this.CurTarget = this.AddAnObj("WANDER");
+    }
+    WanderTestMS() {
+        for (let i = 0; i < 20; i++)
+            this.AddAnObj("WANDER", {}, false);
+    }
+    FollowPathTest() {
+        this.CurTarget = this.AddAnObj("WANDER");
+    }
 }
