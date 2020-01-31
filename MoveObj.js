@@ -20,16 +20,7 @@ class MoveObj extends ShowObj {
         this.isDebug = args.isDebug || false;
         this._steps = [];
 
-        const actionMap = new Map();
-        if (typeof (Seek) !== undefined) actionMap.set("SEEK", Seek);
-        if (typeof (Flee) !== undefined) actionMap.set("FLEE", Flee);
-        if (typeof (Arrive) !== undefined) actionMap.set("ARRIVE", Arrive);
-        if (typeof (Wander) !== undefined) actionMap.set("WANDER", Wander);
-        if (typeof (FollowPath) !== undefined) actionMap.set("FOLLOWPATH", FollowPath);
-
-        var action = actionMap.get(args.ActionModel);
-        this.curAction = new action(this);
-
+        this.curAction = Action.Factory(args.ActionModel,this);
         this.curAction.ActionSetting(args.setting);
     }
 
@@ -64,15 +55,6 @@ class MoveObj extends ShowObj {
     }
 
     update(t, world) {
-        const w_s = world.GetSetting();
-        //环形世界设置
-        if (w_s.isRoundWorld) {
-            const ar = world.GetArea();
-            if (this.x >= ar.width) { this.x = 0; }
-            if (this.x < 0) { this.x = ar.width; }
-            if (this.y >= ar.height) this.y -= ar.height;
-            if (this.y < 0) this.y = ar.height;
-        }
 
         //计算外形基点
         this.a = this.Add((new Vector2D({ x: 0 * this.l, y: 2 * this.l })).Turn(this.r));
@@ -87,7 +69,7 @@ class MoveObj extends ShowObj {
         }
 
 
-        return this.curAction.ActionUpdate(t);
+        return this.curAction.ActionUpdate(t,world);
     }
 
     SetTarget(point, ...x) {

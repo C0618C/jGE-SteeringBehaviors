@@ -28,21 +28,10 @@ class Arrive extends Action {
         this.deceleration = setting.deceleration;
     }
 
-    ActionUpdate(timeSpan) {
+    ActionUpdate(timeSpan, world) {
         this.v.Velocity(this.speed * timeSpan, this.angle);
         if (!this.IsArive(timeSpan)) this.Go(timeSpan);
-    }
-
-    IsArive(t) {
-        if (this.Target == null) return false;
-        // const des = this.speed * t;//下一秒将到达的距离
-        // var curDistanceSq = this.Target.DistanceSq(this.ShowObj);//当前离目标的距离
-        // if (curDistanceSq > this.lastDistanceSq) {
-        //     return true;
-        // }
-        // this.lastDistanceSq = curDistanceSq;
-        // return this.lastDistanceSq - des < 0;
-        return this.Target.DistanceSq(this.ShowObj) == 0;
+        super.ActionUpdate(timeSpan, world);
     }
 
     Go(t) {

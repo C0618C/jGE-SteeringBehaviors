@@ -22,6 +22,9 @@ class Wander extends Seek {
 
     ActionSetting(setting) {
         if (!setting) return;
+
+        super.ActionSetting(setting);
+
         if (setting.tp) this.tp = setting.tp;
         if (setting.radius) this.radius = setting.radius;
         if (setting.distance) this.distance = setting.distance;
@@ -31,8 +34,8 @@ class Wander extends Seek {
         this.ResetTarget();
     }
 
-    ActionUpdate(timeSpan) {
-        super.ActionUpdate(timeSpan);
+    ActionUpdate(timeSpan, world) {
+        super.ActionUpdate(timeSpan, world);
 
         if (this.IsArive(timeSpan) || this.Target == null) this.ResetTarget();
     }
@@ -75,15 +78,13 @@ class Wander extends Seek {
     IsArive(t) {
         if (this.Target == null) return false;
 
+
         //当目标点出在屏幕之外的话
         if (this.Target.Minus(this.ShowObj).Length() > this.radius * 2 + this.distance) return true;
 
-        //方案1 预判下一帧是否到达
-        const des = this.v.speed * t;
-        return this.Target.DistanceSq(this.ShowObj) - des < 0;
+        if (super.IsArive(t)) return true;
 
-        //方案2 当前距离目标是否距离达到预定范围
-        // return this.Target.DistanceSq(this.ShowObj) <= 10;
+        return false;
     }
 
 }

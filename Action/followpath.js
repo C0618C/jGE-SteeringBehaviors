@@ -16,6 +16,7 @@ class FollowPath extends Seek {
 
     ActionSetting(setting) {
         if (setting === undefined) return;
+        super.ActionSetting(setting);
 
         if (setting.PathPoints === undefined) {
             console.warn("[FollowPath]: 使用了路径模式，但没有定义实际！！");
@@ -27,8 +28,8 @@ class FollowPath extends Seek {
 
         this.SetTarget(this.pathpoints[this.pointIndex]);
     }
-    ActionUpdate(timeSpan) {
-        super.ActionUpdate(timeSpan);
+    ActionUpdate(timeSpan, world) {
+        super.ActionUpdate(timeSpan, world);
 
         if (this.IsArive()) {
             this.pointIndex++;

@@ -1,14 +1,19 @@
 class Action {
     constructor(obj) {
-        this.Target = null;
+        this.Target = null;             //当前运动的目标点
         this.ShowObj = obj;
         this.lineSpeed = 0.25;         //线速度px/ms
         this.v = new Vector2D();
         this.v.Velocity(this.lineSpeed, -π_hf);//速度
     }
 
-    ActionUpdate(t) {
-        console.warn("[Action]:ActionUpdate 没实际的定义");
+    ActionUpdate(t,world) {
+        const w_s = world.GetSetting();
+        //环形世界设置
+        if (w_s.isRoundWorld) {
+            const area = world.GetArea();
+            this.AroundTheWorld(area);
+        }
     }
     ActionRender(c2d) {
         this.DrawTarget(c2d);
@@ -16,9 +21,9 @@ class Action {
 
     ActionSetting(setting) {
         if (setting === undefined) return;
-        if (setting.lineSpeed !== undefined) this.lineSpeed = setting.lineSpeed;
-        if (setting.angle !== undefined) this.v.Velocity(this.lineSpeed, setting.angle);
-        if (setting.target !== undefined) this.Target = setting.target;
+        if (setting.LineSpeed !== undefined) this.lineSpeed = setting.LineSpeed;
+        if (setting.Angle !== undefined) this.v.Velocity(this.lineSpeed, setting.Angle);
+        if (setting.Target !== undefined) this.Target = setting.Target;
     }
 
     SetTarget(point) {
@@ -28,10 +33,8 @@ class Action {
     //是否抵达
     IsArive(t) {
         if (this.Target == null) return false;
-        // const des = this.v.speed * t;
-        // return this.Target.DistanceSq(this.ShowObj) - des < 0;
-
-        return this.Target.DistanceSq(this.ShowObj) <= 10;
+        const des = this.v.speed * t;
+        return this.Target.DistanceSq(this.ShowObj) - des < 0 || this.Target.DistanceSq(this.ShowObj) <= 10;
     }
 
     //按当前速度向前走一小步
@@ -63,5 +66,36 @@ class Action {
             c2d.closePath();
             c2d.stroke();
         }
+    }
+
+    //根据边界，使物体出界后从屏幕另一边回到可视区
+    AroundTheWorld(area) {
+        this.ShowObj.Copy(this._letThePointInTheViewArea(this.ShowObj, area));
+        if (this.Target != null) this.Target.Copy(this._letThePointInTheViewArea(this.Target, area));
+    }
+
+    //将一个出界的点映射到可视区内
+    _letThePointInTheViewArea(point, area) {
+        var newPoint = new Vector2D(point);
+
+        if (newPoint.x >= area.width) { newPoint.x = 0; }
+        if (newPoint.x < 0) { newPoint.x = area.width; }
+        if (newPoint.y >= area.height) newPoint.y -= area.height;
+        if (newPoint.y < 0) newPoint.y = area.height;
+
+        return newPoint;
+    }
+
+    //通过名字构造对应的运动模型
+    static Factory(actionModel, param) {
+        const actionMap = new Map();
+        if (typeof (Seek) !== undefined) actionMap.set("SEEK", Seek);
+        if (typeof (Flee) !== undefined) actionMap.set("FLEE", Flee);
+        if (typeof (Arrive) !== undefined) actionMap.set("ARRIVE", Arrive);
+        if (typeof (Wander) !== undefined) actionMap.set("WANDER", Wander);
+        if (typeof (FollowPath) !== undefined) actionMap.set("FOLLOWPATH", FollowPath);
+
+        let AC = actionMap.get(actionModel);
+        return new AC(param);
     }
 }
