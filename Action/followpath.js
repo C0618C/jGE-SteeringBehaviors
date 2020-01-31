@@ -60,7 +60,7 @@ class FollowPath extends Seek {
         //描绘出路径
         c2d.beginPath();
         c2d.moveTo(this.pathpoints[0].x, this.pathpoints[0].y);
-        c2d.strokeStyle = 'gray';
+        c2d.strokeStyle = '#f00fff';
         for (var i = 1; i < this.pathpoints.length; i++) {
             c2d.lineTo(this.pathpoints[i].x, this.pathpoints[i].y);
         }

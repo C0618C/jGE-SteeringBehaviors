@@ -25,13 +25,13 @@ class SteeringBehaviors {
         // this.FleeTest();
 
         //路径跟随
-        //  this.FollowPathTest();
+        this.FollowPathTest();
     }
 
     AddAnObj(acm, setting, isDebug = true) {
         setting = Object.assign({
-            LineSpeed:0.5
-        },setting);
+            LineSpeed: 0.25
+        }, setting);
         let a = this._jGE.GetArea();
         let obj = new MoveObj({
             x: a.width / 2, y: a.height / 2, ActionModel: acm
@@ -71,7 +71,7 @@ class SteeringBehaviors {
         this.CurTarget = this.AddAnObj("FOLLOWPATH", {
             PathPoints: [new Vector2D(352, 218), new Vector2D(858, 79), new Vector2D(1148, 320)
                 , new Vector2D(894, 742), new Vector2D(360, 926), new Vector2D(666, 444), new Vector2D(164, 500)]
-            , RunModel: 1
-        });
+            , RunModel: 1//,LineSpeed:2
+        },true);
     }
 }

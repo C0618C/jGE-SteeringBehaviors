@@ -19,8 +19,9 @@ class MoveObj extends ShowObj {
         //调试用相关
         this.isDebug = args.isDebug || false;
         this._steps = [];
+        this.show_color = "green";
 
-        this.curAction = Action.Factory(args.ActionModel,this);
+        this.curAction = Action.Factory(args.ActionModel, this);
         this.curAction.ActionSetting(args.setting);
     }
 
@@ -41,12 +42,20 @@ class MoveObj extends ShowObj {
             c2d.stroke();
         }
 
+        //领域
+        if (this.isDebug) {
+            c2d.beginPath();
+            c2d.arc(this.x, this.y, 130, 0, π2);
+            c2d.strokeStyle = "red";
+            c2d.stroke();
+        }
+
         //三角形本体
         c2d.beginPath();
         c2d.moveTo(this.a.x, this.a.y);
         c2d.lineTo(this.b.x, this.b.y);
         c2d.lineTo(this.c.x, this.c.y);
-        c2d.fillStyle = 'green';
+        c2d.fillStyle = this.show_color;
         c2d.fill();
 
         //渲染辅助用的东西
@@ -66,10 +75,12 @@ class MoveObj extends ShowObj {
             var lastPoint = this._steps[this._steps.length - 1];
             if (this._steps.length == 0 || (lastPoint.x != this.x && lastPoint.y != this.y))
                 this._steps.push(new Vector2D(this));
+
+            if (this._steps.length >= 1024) this._steps.shift();
         }
 
 
-        return this.curAction.ActionUpdate(t,world);
+        return this.curAction.ActionUpdate(t, world);
     }
 
     SetTarget(point, ...x) {

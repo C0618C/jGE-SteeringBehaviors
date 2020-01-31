@@ -68,7 +68,9 @@ class Wander extends Seek {
 
         y1 = Math.floor(Math.sqrt(r * r - Math.pow(x1 - x2, 2)) * (Math.random() > 0.5 ? 1 : -1) + y2);
 
-        if (typeof x1 === typeof y1) {
+        if (Number.isNaN(x1) || Number.isNaN(y1)) { //随机的缘故，有几率会得出NaN值
+            this.ResetTarget();
+        } else {
             var tg = new Vector2D(x1, y1);
             super.SetTarget(tg);
         }

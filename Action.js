@@ -7,7 +7,7 @@ class Action {
         this.v.Velocity(this.lineSpeed, -π_hf);//速度
     }
 
-    ActionUpdate(t,world) {
+    ActionUpdate(t, world) {
         const w_s = world.GetSetting();
         //环形世界设置
         if (w_s.isRoundWorld) {
@@ -89,13 +89,14 @@ class Action {
     //通过名字构造对应的运动模型
     static Factory(actionModel, param) {
         const actionMap = new Map();
-        if (typeof (Seek) !== undefined) actionMap.set("SEEK", Seek);
-        if (typeof (Flee) !== undefined) actionMap.set("FLEE", Flee);
-        if (typeof (Arrive) !== undefined) actionMap.set("ARRIVE", Arrive);
-        if (typeof (Wander) !== undefined) actionMap.set("WANDER", Wander);
-        if (typeof (FollowPath) !== undefined) actionMap.set("FOLLOWPATH", FollowPath);
+        if (typeof (Seek) !== "undefined") actionMap.set(Seek.name.toUpperCase(), Seek);
+        if (typeof (Flee) !== "undefined") actionMap.set(Flee.name.toUpperCase(), Flee);
+        if (typeof (Arrive) !== "undefined") actionMap.set(Arrive.name.toUpperCase(), Arrive);
+        if (typeof (Wander) !== "undefined") actionMap.set(Wander.name.toUpperCase(), Wander);
+        if (typeof (FollowPath) !== "undefined") actionMap.set(FollowPath.name.toUpperCase(), FollowPath);
+        if (typeof (Pursuit) !== "undefined") actionMap.set(Pursuit.name.toUpperCase(), Pursuit);
 
-        let AC = actionMap.get(actionModel);
+        let AC = actionMap.get(actionModel) || Action;
         return new AC(param);
     }
 }
