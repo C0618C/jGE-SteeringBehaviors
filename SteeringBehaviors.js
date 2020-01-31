@@ -13,7 +13,7 @@ class SteeringBehaviors {
 
         //自动开始徘徊测试
         // this.WanderTest();
-        this.WanderTestMS();
+        // this.WanderTestMS();
 
         //抵达测试
         // this.ArriveTest();
@@ -25,7 +25,7 @@ class SteeringBehaviors {
         // this.FleeTest()
 
         //路径跟随
-        // this.FollowPathTest();
+        this.FollowPathTest();
     }
 
     AddAnObj(acm, setting, isDebug = true) {
@@ -65,6 +65,10 @@ class SteeringBehaviors {
             this.AddAnObj("WANDER", {}, false);
     }
     FollowPathTest() {
-        this.CurTarget = this.AddAnObj("WANDER");
+        this.CurTarget = this.AddAnObj("FOLLOWPATH", {
+            PathPoints: [new Vector2D(352, 218), new Vector2D(858, 79), new Vector2D(1148, 320)
+                , new Vector2D(894, 742), new Vector2D(360, 926), new Vector2D(666, 444), new Vector2D(164, 500)]
+            , RunModel: 2
+        });
     }
 }
