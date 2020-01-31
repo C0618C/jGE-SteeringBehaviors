@@ -44,7 +44,7 @@ class MoveObj extends ShowObj {
         this.v.Velocity(2, -π_hf);
 
 
-        this.l = 10;//三角形外观参数
+        this.l = 5;//三角形外观参数
         this.r = π;
 
         this.tw = 0;//wander时用的当前朝向
@@ -65,16 +65,9 @@ class MoveObj extends ShowObj {
     //靠近
     Seek(v_tg) {
         this.isNeedStop = true;
-        this.CurAction = this.SeekDo;
+        this.CurAction = this.Go;
         this.target = v_tg;
-        //this.SeekDo();
-    }
-    SeekDo(t) {
-        //this.target = v_tg;
-        this.v = this.target.Minus(this).Normalize().Multiply(this.v.speed);
-        this.Go(t);
-
-        console.log("seekdo")
+        this.v = v_tg.Minus(this).Normalize().Multiply(this.v.speed);
     }
 
     //离开
@@ -121,7 +114,7 @@ class MoveObj extends ShowObj {
 
         
         if (this.IsArive(t)) this.WanderResetTarget();
-        if(this.target.Minus(this).Length() > this.wander.radius*2+this.wander.distance)this.WanderResetTarget();//bug fix
+        else if(this.target.Minus(this).Length() > this.wander.radius*2+this.wander.distance)this.WanderResetTarget();//bug fix
 
         this.Go(t);
     }
@@ -138,7 +131,6 @@ class MoveObj extends ShowObj {
         if(typeof x1 === typeof y1){
             this.wander.tg = new Vector2D(x1,y1);
             this.Seek(this.wander.tg);
-            //this.SeekDo(this.wander.tg);
             this.CurAction = this.WanderDo;
         }
         this.isNeedStop = false;
@@ -216,7 +208,8 @@ class MoveObj extends ShowObj {
                 c2d.stroke();
             }
             
-            if(this.wander.showtool){
+            //if(this.wander.showtool)
+	    {
                 c2d.beginPath();
                 c2d.arc(this.wander.tp.x,this.wander.tp.y,this.wander.radius,0,π2);
                 c2d.strokeStyle = "#666cc6";
@@ -230,30 +223,6 @@ class MoveObj extends ShowObj {
                 }
             }
 
-            // if (this.CurAction == this.Wander) {  //徘徊用辅助
-            //     c2d.beginPath();
-            //     c2d.moveTo(this.wander.tp.x, this.wander.tp.y);
-            //     c2d.arc(this.wander.tp.x, this.wander.tp.y, this.wander.radius, 0, 2 * Math.PI);
-            //     c2d.strokeStyle = 'yellow';
-            //     c2d.stroke();
-            // } else if (this.CurAction == this.FollowPath) {
-            //     c2d.fillStyle = 'pink';
-            //     c2d.strokeStyle = 'lightgray';
-            //     let curP = this.target;
-            //     for (var p of this.followpath.points) {
-            //         c2d.beginPath();
-            //         c2d.arc(p.x, p.y, 2, 0, 2 * Math.PI);
-            //         c2d.closePath();
-            //         c2d.fill();
-            //         c2d.beginPath();
-            //         c2d.moveTo(curP.x, curP.y);
-            //         c2d.lineTo(p.x, p.y);
-            //         c2d.closePath();
-            //         c2d.stroke();
-            //         curP.Copy(p);
-            //     }
-            // }
-
             //三角形本体
             c2d.beginPath();
             c2d.moveTo(this.a.x, this.a.y);
@@ -263,7 +232,7 @@ class MoveObj extends ShowObj {
             c2d.fill();
 
             //连线-目标点
-            if (this.target != null) {
+            if (false && this.target != null) {
                 c2d.beginPath();
                 c2d.moveTo(this.x, this.y);
                 c2d.lineTo(this.target.x, this.target.y);
@@ -298,7 +267,7 @@ class MoveObj extends ShowObj {
         }
 
         //this.Go(t);  //移动
-        if (!this.IsArive(t) || !this.isNeedStop)         this.CurAction(t);
+        if (!this.IsArive(t) || !this.isNeedStop) this.CurAction(t);
 
         //计算外形基点
         this.a = this.Add((new Vector2D({ x: 0 * this.l, y: 2 * this.l })).Turn(this.r));
@@ -316,12 +285,14 @@ class MoveObj extends ShowObj {
 
         //加入轨迹
         this._steps.push(new Vector2D(this));
+        if(this._steps.length > 8)this._steps.shift();
     }
 
     //是否抵达目标
     IsArive(t) {
         if (this.target == null) return false;
-        const des = this.v.speed*t;
-        return this.target.DistanceSq(this) - des < 0;
+        //const des = this.v.speed;
+        //return this.target.DistanceSq(this) <= des;
+        return this.target.DistanceSq(this) <= 10;
     }
 }

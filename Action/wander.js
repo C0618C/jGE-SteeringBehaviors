@@ -21,16 +21,15 @@ class Wander extends Seek {
     }
 
     ActionSetting(setting) {
-        if (!setting) return;
+        if (setting) {
+            super.ActionSetting(setting);
 
-        super.ActionSetting(setting);
-
-        if (setting.tp) this.tp = setting.tp;
-        if (setting.radius) this.radius = setting.radius;
-        if (setting.distance) this.distance = setting.distance;
-        if (setting.jitter) this.jitter = setting.jitter;
-        if (setting.tg) this.tg = setting.tg;
-
+            if (setting.tp) this.tp = setting.tp;
+            if (setting.radius) this.radius = setting.radius;
+            if (setting.distance) this.distance = setting.distance;
+            if (setting.jitter) this.jitter = setting.jitter;
+            if (setting.tg) this.tg = setting.tg;
+        }
         this.ResetTarget();
     }
 
@@ -49,7 +48,7 @@ class Wander extends Seek {
         c2d.stroke();
     }
     SetTarget(point) {
-        this.SetTarget();
+        this.ResetTarget();
     }
     ResetTarget() {
         let r = this.radius;

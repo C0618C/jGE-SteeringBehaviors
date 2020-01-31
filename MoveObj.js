@@ -5,6 +5,8 @@
  * ActionModel:运动模式，包含：Seek、
  */
 class MoveObj extends ShowObj {
+    MoveEnvironment = {};       //记录运动场地的一些环境信息
+
     constructor(args = { x, y, ActionModel, isDebug, setting }) {
         super(args);
         this.curAction = null;
@@ -20,9 +22,20 @@ class MoveObj extends ShowObj {
         this.isDebug = args.isDebug || false;
         this._steps = [];
         this.show_color = "green";
+        this.area_radius = 130;
+        this.aroundTest = false;            //是否打开领域功能
 
-        this.curAction = Action.Factory(args.ActionModel, this);
-        this.curAction.ActionSetting(args.setting);
+        this.SwitchAction(args.ActionModel, args.setting);
+
+        // this.MoveObjects = null;
+    }
+
+    SwitchAction(model, setting) {
+        this.curAction = null;
+        this.curAction = Action.Factory(model, this);
+        this.curAction.ActionSetting(setting);
+
+        if (this.MoveEnvironment.MoveObjectsAction) this.MoveEnvironment.MoveObjectsAction.set(this, model);
     }
 
     render(c2d) {
@@ -43,9 +56,9 @@ class MoveObj extends ShowObj {
         }
 
         //领域
-        if (this.isDebug) {
+        if (this.isDebug && this.aroundTest) {
             c2d.beginPath();
-            c2d.arc(this.x, this.y, 130, 0, π2);
+            c2d.arc(this.x, this.y, this.area_radius, 0, π2);
             c2d.strokeStyle = "red";
             c2d.stroke();
         }
@@ -79,12 +92,59 @@ class MoveObj extends ShowObj {
             if (this._steps.length >= 1024) this._steps.shift();
         }
 
+        if (this.aroundTest) this.AroundTest();
 
         return this.curAction.ActionUpdate(t, world);
     }
 
     SetTarget(point, ...x) {
         this.curAction.SetTarget(point, ...x);
+    }
+
+
+
+    //检查周围有哪些附近的对象
+    LookAround() {
+        let aroundObj = new Set();
+        let notAround = new Set();
+        let r = this.area_radius;
+        r *= r;//平方
+        this.MoveEnvironment.MoveObjects.forEach(o => {
+            if (this == o) return;
+
+            if (this.DistanceSq(o) <= r)
+                aroundObj.add(o);
+            else
+                notAround.add(o);
+        });
+        return { aroundObj, notAround };
+    }
+
+
+    AroundTest(t) {
+        this.show_color = "yellow";
+        let info = this.LookAround();
+
+        info.aroundObj.forEach(o => {
+            o.show_color = "#f000ef";
+            var curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
+            if (curAction != "FLEE")
+                o.SwitchAction("FLEE", { Target: new Vector2D(this) });
+            else
+                o.SetTarget(new Vector2D(this));
+
+        });
+
+        let r = this.area_radius;
+        r *= r * 2;
+        info.notAround.forEach(o => {
+            o.show_color = "green";
+            var curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
+            if (curAction != "WANDER" && this.DistanceSq(o) > r)
+                o.SwitchAction("WANDER");
+            else if (curAction === "FLEE")
+                o.SetTarget(new Vector2D(this));
+        });
     }
 
 }

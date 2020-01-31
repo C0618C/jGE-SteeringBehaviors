@@ -9,6 +9,7 @@ class SteeringBehaviors {
         document.getElementById(domName).appendChild(this._jGE.GetDom());
 
         this.MoveObjects = new Set();
+        this.MoveObjectsAction = new WeakMap();
         //this.CurTarget = this.AddAnObj();  //当前获得焦点的物体
 
         //自动开始徘徊测试
@@ -26,6 +27,8 @@ class SteeringBehaviors {
 
         //路径跟随
         this.FollowPathTest();
+
+        this.AreaSpaceTest();       //领域测试
     }
 
     AddAnObj(acm, setting, isDebug = true) {
@@ -40,6 +43,8 @@ class SteeringBehaviors {
         });
         this.MoveObjects.add(obj);
         this._jGE.add(obj);
+        obj.MoveEnvironment = { MoveObjects: this.MoveObjects, MoveObjectsAction: this.MoveObjectsAction };
+        this.MoveObjectsAction.set(obj, "acm");
 
         return obj;
     }
@@ -64,14 +69,19 @@ class SteeringBehaviors {
         this.CurTarget = this.AddAnObj("WANDER");
     }
     WanderTestMS() {
-        for (let i = 0; i < 20; i++)
+        for (let i = 0; i < 80; i++)
             this.AddAnObj("WANDER", {}, false);
     }
     FollowPathTest() {
         this.CurTarget = this.AddAnObj("FOLLOWPATH", {
             PathPoints: [new Vector2D(352, 218), new Vector2D(858, 79), new Vector2D(1148, 320)
                 , new Vector2D(894, 742), new Vector2D(360, 926), new Vector2D(666, 444), new Vector2D(164, 500)]
-            , RunModel: 1//,LineSpeed:2
-        },true);
+            , RunModel: 1, LineSpeed: 0.4
+        }, true);
+    }
+
+    //领域测试
+    AreaSpaceTest() {
+        this.CurTarget.aroundTest = true;
     }
 }
