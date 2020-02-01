@@ -5,7 +5,7 @@
  * ActionModel:运动模式，包含：Seek、
  */
 class MoveObj extends ShowObj {
-    MoveEnvironment = {};       //记录运动场地的一些环境信息
+    // MoveEnvironment = {};       //记录运动场地的一些环境信息
 
     constructor(args = { x: 0, y: 0, ActionModel, isDebug, setting }) {
         super(args);
@@ -36,7 +36,7 @@ class MoveObj extends ShowObj {
         this.curAction = Action.Factory(model, this);
         this.curAction.ActionSetting(setting);
 
-        if (this.MoveEnvironment.MoveObjectsAction) this.MoveEnvironment.MoveObjectsAction.set(this, model);
+        // if (this.MoveEnvironment.MoveObjectsAction) this.MoveEnvironment.MoveObjectsAction.set(this, model);
     }
 
     render(c2d) {
@@ -93,7 +93,7 @@ class MoveObj extends ShowObj {
             if (this._steps.length >= 1024) this._steps.shift();
         }
 
-        if (this.aroundTest) this.AroundTest();
+        // if (this.aroundTest) this.AroundTest();
 
         if (this.curAction) return this.curAction.ActionUpdate(t, world);
 
@@ -104,56 +104,19 @@ class MoveObj extends ShowObj {
         this.curAction.SetTarget(point, ...x);
     }
 
-    StarRun() {
+    StarRun(ActionType,ActionRegister) {
         if (this.actionLogic) {
-            this.actionLogic.Normal();
+            this.actionLogic[ActionType]();
+            if(ActionRegister)  ActionRegister.set(this,ActionType);
+            else console.warn("注意：切换运动模式时没有登记！");
         }
     }
 
 
 
-    //检查周围有哪些附近的对象
-    LookAround() {
-        let aroundObj = new Set();
-        let notAround = new Set();
-        let r = this.area_radius;
-        r *= r;//平方
-        this.MoveEnvironment.MoveObjects.forEach(o => {
-            if (this == o) return;
-
-            if (this.DistanceSq(o) <= r)
-                aroundObj.add(o);
-            else
-                notAround.add(o);
-        });
-        return { aroundObj, notAround };
-    }
 
 
-    AroundTest(t) {
-        this.show_color = "yellow";
-        let info = this.LookAround();
 
-        info.aroundObj.forEach(o => {
-            o.show_color = "#f000ef";
-            let curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
-            if (curAction != "FLEE")
-                o.actionLogic.Escape();
 
-            o.SetTarget(new Vector2D(this));
-
-        });
-
-        let r = this.area_radius;
-        r *= r * 4;
-        info.notAround.forEach(o => {
-            o.show_color = "green";
-            let curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
-            if (curAction != "WANDER" && this.DistanceSq(o) > r)
-                o.actionLogic.Normal();
-            else if (curAction === "FLEE")
-                o.SetTarget(new Vector2D(this));
-        });
-    }
 
 }

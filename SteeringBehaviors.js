@@ -5,6 +5,7 @@ class SteeringBehaviors {
             width: document.documentElement.clientWidth
             , height: document.documentElement.clientHeight
         });
+        this._jGE.add(this);
 
         document.getElementById(domName).appendChild(this._jGE.GetDom());
 
@@ -33,6 +34,29 @@ class SteeringBehaviors {
         this.ActionLogicTest();
     }
 
+    update(timeSpan, world) {
+        this.AroundTest(timeSpan);
+    }
+
+    //检查周围有哪些附近的对象
+    LookAround(target) {
+        let aroundObj = new Set();
+        let notAround = new Set();
+        let r = target.area_radius;
+        r *= r;//平方
+        this.MoveObjects.forEach(o => {
+            if (target == o) return;
+
+            if (target.DistanceSq(o) <= r)
+                aroundObj.add(o);
+            else
+                notAround.add(o);
+        });
+        return { aroundObj, notAround };
+    }
+
+    ///--------------------------- 测试用的方法-----------------------------
+
     AddAnObj(acm, setting, isDebug = true) {
         setting = Object.assign({
             LineSpeed: 0.25
@@ -45,7 +69,7 @@ class SteeringBehaviors {
         });
         this.MoveObjects.add(obj);
         this._jGE.add(obj);
-        obj.MoveEnvironment = { MoveObjects: this.MoveObjects, MoveObjectsAction: this.MoveObjectsAction };
+        // obj = { MoveObjects: this.MoveObjects, MoveObjectsAction: this.MoveObjectsAction };
         this.MoveObjectsAction.set(obj, acm);
 
         return obj;
@@ -60,13 +84,10 @@ class SteeringBehaviors {
         this.CurTarget = this.AddAnObj("FLEE");
         this._jGE.OnMouse("click", (e) => this.CurTarget.SetTarget(new Vector2D(GetEventPosition(e))));
     }
-
-
     ArriveTest() {
         this.CurTarget = this.AddAnObj("ARRIVE", { deceleration: 0.25 });
         this._jGE.OnMouse("click", (e) => this.CurTarget.SetTarget(new Vector2D(GetEventPosition(e)), Math.random()));
     }
-
     WanderTest() {
         this.CurTarget = this.AddAnObj("WANDER");
     }
@@ -83,9 +104,32 @@ class SteeringBehaviors {
     }
 
     //领域测试
-    AreaSpaceTest() {
-        this.CurTarget.aroundTest = true;
+    AroundTest(t) {
+        let info = this.LookAround(this.CurTarget);
+
+        info.aroundObj.forEach(o => {
+            o.show_color = "#f000ef";
+            let curAction = this.MoveObjectsAction.get(o);
+            if (curAction != "Escape")
+                o.StarRun("Escape",this.MoveObjectsAction);
+
+            o.SetTarget(new Vector2D(this.CurTarget));
+
+        });
+
+        let r = this.CurTarget.area_radius;
+        r *= r * 4;
+        info.notAround.forEach(o => {
+            o.show_color = "green";
+            let curAction = this.MoveObjectsAction.get(o);
+            if (curAction != "Normal" && this.CurTarget.DistanceSq(o) > r)
+                o.StarRun("Normal",this.MoveObjectsAction);
+            else if (curAction === "Escape")
+                o.SetTarget(new Vector2D(this.CurTarget));
+        });
     }
+
+
 
     ActionLogicTest() {
         //小动物的构建
@@ -101,14 +145,14 @@ class SteeringBehaviors {
                 , LineSpeed: 0.15
             }
         ]
-        for (let i = 0; i < 180; i++) 
-        {
-            let smallAnimal = this.AddAnObj(null,null,i==1);
+        for (let i = 0; i < 180; i++) {
+            let smallAnimal = this.AddAnObj(null, null, i == 1);
             smallAnimal.actionLogic = new ActionLogic(smallAnimalActionLogic, smallAnimal);
-            smallAnimal.StarRun();
+            this.MoveObjectsAction.set(smallAnimal, "Normal");
+            smallAnimal.StarRun("Normal",this.MoveObjectsAction);
         }
 
-        //巡逻者的构建
+        //猎食者的构建
         let hunterLogic = [
             {
                 Type: "Normal"
@@ -122,6 +166,9 @@ class SteeringBehaviors {
         let hunter = this.AddAnObj();
         hunter.actionLogic = new ActionLogic(hunterLogic, hunter);
         hunter.aroundTest = true;
-        hunter.StarRun();
+        hunter.show_color = "yellow";
+        this.CurTarget = hunter;
+        this.MoveObjectsAction.set(hunter, "Normal");
+        hunter.StarRun("Normal",this.MoveObjectsAction);
     }
 }
