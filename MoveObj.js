@@ -7,9 +7,10 @@
 class MoveObj extends ShowObj {
     MoveEnvironment = {};       //记录运动场地的一些环境信息
 
-    constructor(args = { x, y, ActionModel, isDebug, setting }) {
+    constructor(args = { x: 0, y: 0, ActionModel, isDebug, setting }) {
         super(args);
         this.curAction = null;
+        this.actionLogic = null;        //行为管理
 
         //显示用的物体（三角形）
         this.l = 10;//三角形外观参数
@@ -25,7 +26,7 @@ class MoveObj extends ShowObj {
         this.area_radius = 130;
         this.aroundTest = false;            //是否打开领域功能
 
-        this.SwitchAction(args.ActionModel, args.setting);
+        if (args.ActionModel) this.SwitchAction(args.ActionModel, args.setting);
 
         // this.MoveObjects = null;
     }
@@ -72,7 +73,7 @@ class MoveObj extends ShowObj {
         c2d.fill();
 
         //渲染辅助用的东西
-        if (this.isDebug)
+        if (this.isDebug && this.curAction)
             this.curAction.ActionRender(c2d);
     }
 
@@ -85,7 +86,7 @@ class MoveObj extends ShowObj {
 
         //加入轨迹
         if (this.isDebug) {
-            var lastPoint = this._steps[this._steps.length - 1];
+            let lastPoint = this._steps[this._steps.length - 1];
             if (this._steps.length == 0 || (lastPoint.x != this.x && lastPoint.y != this.y))
                 this._steps.push(new Vector2D(this));
 
@@ -94,11 +95,19 @@ class MoveObj extends ShowObj {
 
         if (this.aroundTest) this.AroundTest();
 
-        return this.curAction.ActionUpdate(t, world);
+        if (this.curAction) return this.curAction.ActionUpdate(t, world);
+
+        return true;
     }
 
     SetTarget(point, ...x) {
         this.curAction.SetTarget(point, ...x);
+    }
+
+    StarRun() {
+        if (this.actionLogic) {
+            this.actionLogic.Normal();
+        }
     }
 
 
@@ -127,21 +136,21 @@ class MoveObj extends ShowObj {
 
         info.aroundObj.forEach(o => {
             o.show_color = "#f000ef";
-            var curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
+            let curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
             if (curAction != "FLEE")
-                o.SwitchAction("FLEE", { Target: new Vector2D(this) });
-            else
-                o.SetTarget(new Vector2D(this));
+                o.actionLogic.Escape();
+
+            o.SetTarget(new Vector2D(this));
 
         });
 
         let r = this.area_radius;
-        r *= r * 2;
+        r *= r * 4;
         info.notAround.forEach(o => {
             o.show_color = "green";
-            var curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
+            let curAction = this.MoveEnvironment.MoveObjectsAction.get(o);
             if (curAction != "WANDER" && this.DistanceSq(o) > r)
-                o.SwitchAction("WANDER");
+                o.actionLogic.Normal();
             else if (curAction === "FLEE")
                 o.SetTarget(new Vector2D(this));
         });

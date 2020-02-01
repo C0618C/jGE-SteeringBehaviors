@@ -15,6 +15,17 @@
 1. 按照第三章的内容，做到与书中附带案例的效果。  
 2. 可以通过UI控制、调试各种运动参数。  
 3. 研究其它聚集效应的案例和算法，整合或优化现有的东西。
+4. 让运动体看起来像是活的
+
+## TODO
+* 封装MovieObj的运动模式
+* 运动模式的权值计算及切换
+* 完成编队模式
+* 实现避免重叠
+* 群聚完成群聚模式
+* 实现避障
+* 实现围墙
+
 
 # License
 You may use the Steering Behaviors under the MIT license. See LICENSE.

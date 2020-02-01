@@ -37,7 +37,7 @@ class Arrive extends Action {
     Go(t) {
         if (this.Target == null) return;
         this.ShowObj.AddIn(this.v);
-        var curDistanceSq = this.Target.DistanceSq(this.ShowObj);//当前离目标的距离
+        let curDistanceSq = this.Target.DistanceSq(this.ShowObj);//当前离目标的距离
 
         //跑过了目标的情况 速度太快的话有，会有越过目标但返回的bug
         if (curDistanceSq > this.lastDistanceSq) {

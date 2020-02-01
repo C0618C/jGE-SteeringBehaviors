@@ -55,7 +55,7 @@ class Wander extends Seek {
 
         //算出圆心实际位置
         this.tp.Copy(this.ShowObj);
-        var vs = new Vector2D();
+        let vs = new Vector2D();
         vs.Velocity(this.distance, this.v.va);
         this.tp.AddIn(vs);
 
@@ -70,8 +70,7 @@ class Wander extends Seek {
         if (Number.isNaN(x1) || Number.isNaN(y1)) { //随机的缘故，有几率会得出NaN值
             this.ResetTarget();
         } else {
-            var tg = new Vector2D(x1, y1);
-            super.SetTarget(tg);
+            super.SetTarget(new Vector2D(x1, y1));
         }
     }
 

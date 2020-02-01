@@ -14,7 +14,7 @@ class SteeringBehaviors {
 
         //自动开始徘徊测试
         // this.WanderTest();
-        this.WanderTestMS();
+        // this.WanderTestMS();
 
         //抵达测试
         // this.ArriveTest();
@@ -26,9 +26,11 @@ class SteeringBehaviors {
         // this.FleeTest();
 
         //路径跟随
-        this.FollowPathTest();
+        // this.FollowPathTest();
 
-        this.AreaSpaceTest();       //领域测试
+        // this.AreaSpaceTest();       //领域测试
+
+        this.ActionLogicTest();
     }
 
     AddAnObj(acm, setting, isDebug = true) {
@@ -44,7 +46,7 @@ class SteeringBehaviors {
         this.MoveObjects.add(obj);
         this._jGE.add(obj);
         obj.MoveEnvironment = { MoveObjects: this.MoveObjects, MoveObjectsAction: this.MoveObjectsAction };
-        this.MoveObjectsAction.set(obj, "acm");
+        this.MoveObjectsAction.set(obj, acm);
 
         return obj;
     }
@@ -70,7 +72,7 @@ class SteeringBehaviors {
     }
     WanderTestMS() {
         for (let i = 0; i < 80; i++)
-            this.AddAnObj("WANDER", {}, false);
+            this.AddAnObj("WANDER", { LineSpeed: 0.25 }, false);
     }
     FollowPathTest() {
         this.CurTarget = this.AddAnObj("FOLLOWPATH", {
@@ -83,5 +85,43 @@ class SteeringBehaviors {
     //领域测试
     AreaSpaceTest() {
         this.CurTarget.aroundTest = true;
+    }
+
+    ActionLogicTest() {
+        //小动物的构建
+        let smallAnimalActionLogic = [
+            {
+                Type: "Escape"
+                , Action: "Flee"
+                , LineSpeed: 0.5
+            },
+            {
+                Type: "Normal"
+                , Action: "Wander"
+                , LineSpeed: 0.15
+            }
+        ]
+        for (let i = 0; i < 180; i++) 
+        {
+            let smallAnimal = this.AddAnObj(null,null,i==1);
+            smallAnimal.actionLogic = new ActionLogic(smallAnimalActionLogic, smallAnimal);
+            smallAnimal.StarRun();
+        }
+
+        //巡逻者的构建
+        let hunterLogic = [
+            {
+                Type: "Normal"
+                , Action: "FollowPath"
+                , LineSpeed: 0.25
+                , PathPoints: [new Vector2D(352, 218), new Vector2D(858, 79), new Vector2D(1148, 320)
+                    , new Vector2D(894, 742), new Vector2D(360, 926), new Vector2D(666, 444), new Vector2D(164, 500)]
+                , RunModel: 1, LineSpeed: 0.4
+            }
+        ]
+        let hunter = this.AddAnObj();
+        hunter.actionLogic = new ActionLogic(hunterLogic, hunter);
+        hunter.aroundTest = true;
+        hunter.StarRun();
     }
 }

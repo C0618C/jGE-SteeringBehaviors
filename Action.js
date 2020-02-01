@@ -76,7 +76,7 @@ class Action {
 
     //将一个出界的点映射到可视区内
     _letThePointInTheViewArea(point, area) {
-        var newPoint = new Vector2D(point);
+        let newPoint = new Vector2D(point);
 
         if (newPoint.x >= area.width) { newPoint.x = 0; }
         if (newPoint.x < 0) { newPoint.x = area.width; }
