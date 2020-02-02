@@ -23,6 +23,9 @@ class FollowPath extends Seek {
             return;
         }
         this.pathpoints.push(...setting.PathPoints);
+        for (let p = 0; p < this.pathpoints.length; p++) {
+            if (Array.isArray(this.pathpoints[p])) this.pathpoints[p] = new Vector2D(...this.pathpoints[p]);
+        }
 
         if (setting.RunModel !== undefined) this.runmodel = setting.RunModel;
 

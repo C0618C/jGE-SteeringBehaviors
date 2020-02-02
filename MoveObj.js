@@ -23,7 +23,7 @@ class MoveObj extends ShowObj {
         this.isDebug = args.isDebug || false;
         this._steps = [];
         this.show_color = "green";
-        this.area_radius = 130;
+        this.area_radius = 90;
         this.aroundTest = false;            //是否打开领域功能
 
         if (args.ActionModel) this.SwitchAction(args.ActionModel, args.setting);
